@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE } from "@/config";
 import {
   ArrowLeft,
   Wallet,
@@ -58,7 +59,7 @@ function NetworkStatusWidget() {
   const { data, isLoading, error, refetch, isFetching } = useQuery<NetworkStatus>({
     queryKey: ["network-status"],
     queryFn: async () => {
-      const res = await fetch("/api/network-status");
+      const res = await fetch(`${API_BASE}/api/network-status`);
       if (!res.ok) throw new Error("Failed to fetch network status");
       return res.json();
     },
