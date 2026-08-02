@@ -1,0 +1,287 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: waitlist
+    description: Waitlist operations
+  - name: submissions
+    description: Pitch deck submissions
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /waitlist:
+    post:
+      operationId: createWaitlistEntry
+      tags: [waitlist]
+      summary: Join the waitlist
+      description: Submit an email to join the waitlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaitlistInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaitlistEntry"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: getWaitlist
+      tags: [waitlist]
+      summary: Get all waitlist entries
+      description: Returns all waitlist entries. Requires admin key.
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            type: string
+          description: Admin secret key
+      responses:
+        "200":
+          description: List of waitlist entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WaitlistEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /submissions:
+    post:
+      operationId: createSubmission
+      tags: [submissions]
+      summary: Submit a pitch deck
+      description: Submit a pitch deck with wallet address and details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: getSubmissions
+      tags: [submissions]
+      summary: Get all submissions
+      description: Returns all submissions with optional status filter
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+          description: Filter by status
+      responses:
+        "200":
+          description: List of submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Submission"
+  /submissions/verify:
+    post:
+      operationId: verifyDeposit
+      tags: [submissions]
+      summary: Verify USDC deposit
+      description: Check if a wallet has sent >= $50 USDC to the fund wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyDepositInput"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyDepositResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    WaitlistInput:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    WaitlistEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - createdAt
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    SubmissionInput:
+      type: object
+      required:
+        - walletAddress
+        - deckUrl
+        - description
+        - teamSize
+      properties:
+        walletAddress:
+          type: string
+          description: The connected wallet address
+        deckUrl:
+          type: string
+          description: URL to the pitch deck (YouTube, DocSend, etc.)
+        description:
+          type: string
+          description: Brief description of the project
+        teamSize:
+          type: integer
+          description: Number of team members
+    Submission:
+      type: object
+      properties:
+        id:
+          type: integer
+        walletAddress:
+          type: string
+        deckUrl:
+          type: string
+        description:
+          type: string
+        teamSize:
+          type: integer
+        status:
+          type: string
+        depositVerified:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - walletAddress
+        - deckUrl
+        - description
+        - teamSize
+        - status
+        - depositVerified
+        - createdAt
+        - updatedAt
+    VerifyDepositInput:
+      type: object
+      required:
+        - walletAddress
+      properties:
+        walletAddress:
+          type: string
+          description: Wallet address to check for USDC deposit
+    VerifyDepositResult:
+      type: object
+      properties:
+        verified:
+          type: boolean
+        amount:
+          type: number
+        txHash:
+          type: string
+        blockNumber:
+          type: integer
+        status:
+          type: string
+      required:
+        - verified
+        - amount
+        - status
