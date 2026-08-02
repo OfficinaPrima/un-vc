@@ -7,6 +7,8 @@ import Home from "@/pages/home";
 import Manifesto from "@/pages/manifesto";
 import Apply from "@/pages/apply";
 import Submissions from "@/pages/submissions";
+import Auth from "@/pages/auth";
+import { AuthProvider } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +19,7 @@ function Router() {
       <Route path="/manifesto" component={Manifesto} />
       <Route path="/apply" component={Apply} />
       <Route path="/submissions" component={Submissions} />
+      <Route path="/login" component={Auth} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -25,12 +28,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

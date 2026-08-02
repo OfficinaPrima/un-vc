@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
     "viem": "^2.52.2",
     "wagmi": "^2.19.5"
   }

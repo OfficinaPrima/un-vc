@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, DollarSign, CheckCircle2 } from "lucide-react";
 
 const FadeIn = ({ children, delay = 0, className = "", direction = "up" }: any) => {
@@ -22,6 +23,7 @@ const FadeIn = ({ children, delay = 0, className = "", direction = "up" }: any) 
 
 export default function Home() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isCopied, setIsCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -45,6 +47,14 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 mix-blend-difference">
         <div className="font-display font-bold text-2xl tracking-tighter text-white">UN-VC</div>
         <div className="flex items-center gap-4">
+          <Link href="/login">
+            <Button
+              variant="ghost"
+              className="rounded-none text-white hover:bg-white hover:text-black transition-colors"
+            >
+              {user ? "Account" : "Log In"}
+            </Button>
+          </Link>
           <Link href="/submissions">
             <Button
               variant="ghost"
