@@ -47,7 +47,7 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 mix-blend-difference">
         <div className="font-display font-bold text-2xl tracking-tighter text-white">UN-VC</div>
         <div className="flex items-center gap-4">
-          <Link href="/login">
+          <Link href={user ? "/profile" : "/login"}>
             <Button
               variant="ghost"
               className="rounded-none text-white hover:bg-white hover:text-black transition-colors"
