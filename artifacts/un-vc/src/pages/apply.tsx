@@ -316,6 +316,9 @@ export default function Apply() {
                 <span className="text-white font-bold shrink-0 w-5">3.</span>
                 Fill in the form below and submit. We verify your deposit automatically.
               </p>
+              <p className="text-xs text-muted-foreground/70 leading-relaxed pt-4 border-t border-border mt-4">
+                Network fees are not included in any transaction. For any funds leaving the UN-VC fund — whether a disbursement or a refund — the network fee is absorbed by that transaction and deducted from the amount sent. UN-VC does not pay network fees on top of the stated dollar amounts.
+              </p>
             </div>
           </div>
         </FadeIn>

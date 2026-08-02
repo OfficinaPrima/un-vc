@@ -136,7 +136,7 @@ export default function Manifesto() {
           <FadeIn delay={0.1} className="mb-10">
             <h3 className="text-xl font-bold uppercase tracking-tight text-white mb-4">The Threshold</h3>
             <Body className="mb-0">
-              The fund does not act until a meaningful pool exists. A target threshold — initially $250,000 — must be reached before any investment decision is made. This ensures the fund has real capital to deploy, creates urgency for participants to recruit others who believe in the project, and makes the first investment meaningful rather than symbolic.
+              The fund does not act until a meaningful pool exists. Fund 1's target is $5,000 — enough to help someone start something real — with later funds scaling up to $15,000, then $25,000 across 2026–2027. Reaching the target creates urgency for participants to recruit others who believe in the project, and makes the first investment meaningful rather than symbolic.
             </Body>
           </FadeIn>
 
@@ -187,6 +187,9 @@ export default function Manifesto() {
             <Body className="mb-0">
               Once pitches are heard, the community votes. One ID, one vote. The decision belongs to the crowd — the same crowd that has put skin in the game. Voting is based purely on innovation and execution potential, not on the presenter's track record or relatability to the average investor. The community is the filter. The community bears the outcome.
             </Body>
+            <p className="text-sm text-white/50 font-light mt-4">
+              Why only founders vote: a vote that costs nothing can be faked a thousand times over. Voting is reserved for those who&apos;ve submitted — a $50 on-chain deposit and a real project on the line. Skin in the game keeps the outcome real, and every deposit is public and auditable.
+            </p>
           </FadeIn>
 
           <FadeIn delay={0.5}>
@@ -283,7 +286,7 @@ export default function Manifesto() {
             <div className="border border-white/10 p-10 mt-8 bg-white/[0.02]">
               <p className="text-white/40 text-xs uppercase tracking-widest font-mono mb-4">The Fund Is Pre-Launch</p>
               <p className="text-xl text-white/80 font-light mb-8">
-                USDC deposits are open now. When the fund (USDC wallet holding) reaches $25,000, voting will commence.
+                USDC deposits are open now. When Fund 1 reaches its $5,000 target, voting will commence.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/" className="inline-flex items-center justify-center h-14 px-8 border border-white/20 text-white text-sm uppercase tracking-widest font-semibold hover:bg-white/5 transition-colors">

@@ -158,7 +158,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
           {[
             { title: "The Stake", desc: "Anyone looking to raise contributes $50 in USDC into a fully transparent, publicly auditable crypto wallet. Every cent is on-chain." },
-            { title: "The Threshold", desc: "Once the fund hits a threshold (e.g. $250,000), it's ready to make its first investment." },
+            { title: "The Threshold", desc: "Once the fund reaches its target — $5,000 for Fund 1 — it's ready to make its first investment." },
             { title: "One Vote", desc: "Every contributor — whether they put in $50 or $10,000 — gets exactly ONE vote. Capital does not buy influence here." },
             { title: "The Lottery", desc: "A random number is assigned to each participant. A lottery determines who even gets to pitch — preventing anyone from gaming the system." },
             { title: "Pure Innovation", desc: "The community then votes on the best ideas, based purely on innovation and execution potential." },
@@ -207,6 +207,9 @@ export default function Home() {
             </p>
             <p className="mt-8 text-xl text-black/70 font-medium">
               You have no shortage of places that do. This one is for the founders.
+            </p>
+            <p className="mt-8 text-base text-black/60 font-light max-w-2xl mx-auto leading-relaxed">
+              But if you simply want to back it — no terms, no strings — the door is open. The fund's deposit address accepts any amount, so angels and accredited investors can contribute beyond the $50. Contributing doesn't buy votes or influence — voting belongs to founders who've submitted — but every dollar is on-chain, public, and fuels real innovation.
             </p>
           </FadeIn>
         </div>
@@ -311,6 +314,14 @@ export default function Home() {
             <p className="mt-6 text-xs text-muted-foreground uppercase tracking-widest">
               Wallet verification and deposit check are live.
             </p>
+            <div className="mt-12 border-t border-border pt-8 max-w-2xl mx-auto">
+              <p className="text-white font-bold uppercase tracking-widest text-sm mb-2">
+                You don't have to submit a deck to be part of the movement.
+              </p>
+              <p className="text-muted-foreground font-light text-sm leading-relaxed">
+                Create a free account to follow along and stand behind real innovation. Submitting a deck — with the $50 deposit — is what puts you in the pool and earns you a vote.
+              </p>
+            </div>
           </FadeIn>
         </div>
       </section>
