@@ -283,12 +283,9 @@ export default function Manifesto() {
             <div className="border border-white/10 p-10 mt-8 bg-white/[0.02]">
               <p className="text-white/40 text-xs uppercase tracking-widest font-mono mb-4">The Fund Is Pre-Launch</p>
               <p className="text-xl text-white/80 font-light mb-8">
-                USDC deposits are open now. The waitlist is open now. The infrastructure is being built in public, based on demonstrated demand. Join early. Everything that comes next is visible on-chain.
+                USDC deposits are open now. When the fund (USDC wallet holding) reaches $25,000, voting will commence.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/" className="inline-flex items-center justify-center h-14 px-8 bg-white text-black text-sm uppercase tracking-widest font-bold hover:bg-white/90 transition-colors">
-                  Join the Waitlist
-                </Link>
                 <Link href="/" className="inline-flex items-center justify-center h-14 px-8 border border-white/20 text-white text-sm uppercase tracking-widest font-semibold hover:bg-white/5 transition-colors">
                   Back to UN-VC
                 </Link>

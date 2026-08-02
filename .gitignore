@@ -55,3 +55,6 @@ Thumbs.db
 # Internal planning docs — keep private
 un-vc-handoff.md
 un-vc-chat-history.md
+
+# Zip archives (un-vc-project.zip smuggles .replit/ADMIN_SECRET + chat history)
+*.zip

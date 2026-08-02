@@ -275,7 +275,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Apply to Pitch / Waitlist Section */}
+      {/* Apply to Pitch Section */}
       <section id="apply" className="px-6 md:px-12 lg:px-24 py-32 border-b border-border scroll-mt-24">
         <div className="max-w-3xl mx-auto text-center">
           <FadeIn>
