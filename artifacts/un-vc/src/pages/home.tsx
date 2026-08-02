@@ -261,7 +261,7 @@ export default function Home() {
               <div className="w-full md:w-[320px] shrink-0">
                 <div className="aspect-square w-full bg-background flex items-center justify-center border border-border p-6">
                   <img
-                    src="/qr-code.png"
+                    src={`${import.meta.env.BASE_URL}qr-code.png`}
                     alt="USDC Deposit QR Code"
                     className="w-full h-full object-contain"
                   />

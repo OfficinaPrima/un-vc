@@ -292,7 +292,7 @@ export default function Apply() {
             <div className="flex flex-col items-center">
               <div className="w-[180px] h-[180px] bg-background flex items-center justify-center border border-border p-3">
                 <img
-                  src="/qr-code.png"
+                  src={`${import.meta.env.BASE_URL}qr-code.png`}
                   alt="USDC Deposit QR Code"
                   className="w-full h-full object-contain"
                 />
