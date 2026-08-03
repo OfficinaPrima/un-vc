@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { FundProgress } from "@/components/fund-progress";
 import { ArrowRight, DollarSign, CheckCircle2 } from "lucide-react";
 
 const FadeIn = ({ children, delay = 0, className = "", direction = "up" }: any) => {
@@ -285,6 +286,13 @@ export default function Home() {
               </div>
             </div>
           </FadeIn>
+        </div>
+      </section>
+
+      {/* Fund Progress */}
+      <section className="px-6 md:px-12 lg:px-24 py-20 border-b border-border">
+        <div className="max-w-3xl mx-auto">
+          <FundProgress />
         </div>
       </section>
 
