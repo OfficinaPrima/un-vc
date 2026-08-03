@@ -10,6 +10,8 @@ import Submissions from "@/pages/submissions";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
 import Admin from "@/pages/admin";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
 import { AuthProvider } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ function Router() {
       <Route path="/login" component={Auth} />
       <Route path="/profile" component={Profile} />
       <Route path="/admin" component={Admin} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -304,7 +304,8 @@ export default function Manifesto() {
         <div>© {new Date().getFullYear()} UN-VC. All rights reserved.</div>
         <div className="flex gap-8">
           <Link href="/manifesto" className="hover:text-white transition-colors">Manifesto</Link>
-          <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+          <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
         </div>
       </footer>
     </div>
