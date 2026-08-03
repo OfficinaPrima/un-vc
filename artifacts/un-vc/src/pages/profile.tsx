@@ -3,8 +3,17 @@ import { Link, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
+import { API_BASE } from "@/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+type MySubmission = {
+  id: number;
+  deckUrl: string;
+  description: string;
+  status: string;
+  createdAt: string;
+};
 
 export default function Profile() {
   const { user, loading, signOut } = useAuth();
@@ -13,6 +22,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [subs, setSubs] = useState<MySubmission[]>([]);
+  const [subsLoading, setSubsLoading] = useState(true);
 
   // Not logged in → send to the login page.
   useEffect(() => {
@@ -24,6 +35,34 @@ export default function Profile() {
     if (user) {
       setDisplayName((user.user_metadata?.display_name as string) ?? "");
     }
+  }, [user]);
+
+  // Load this account's submissions.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    (async () => {
+      setSubsLoading(true);
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) {
+        if (active) setSubsLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/submissions/mine`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok && active) setSubs((await res.json()) as MySubmission[]);
+      } catch {
+        /* leave list empty on error */
+      } finally {
+        if (active) setSubsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   if (loading || !user) {
@@ -109,23 +148,58 @@ export default function Profile() {
           </div>
         </section>
 
-        {/* Submissions (populated in a later step) */}
+        {/* Submissions */}
         <section className="border border-border p-8 mb-8">
-          <h2 className="text-sm uppercase tracking-widest font-bold mb-4">
+          <h2 className="text-sm uppercase tracking-widest font-bold mb-6">
             Your Submissions
           </h2>
-          <p className="text-muted-foreground text-sm mb-6">
-            You haven&apos;t submitted a deck yet. Your submissions will appear
-            here.
-          </p>
-          <Link href="/apply">
-            <Button
-              variant="outline"
-              className="rounded-none h-11 border-white/20 uppercase tracking-widest text-xs font-bold"
-            >
-              Submit a Deck
-            </Button>
-          </Link>
+
+          {subsLoading ? (
+            <p className="text-muted-foreground text-sm animate-pulse">
+              Loading your submissions...
+            </p>
+          ) : subs.length === 0 ? (
+            <>
+              <p className="text-muted-foreground text-sm mb-6">
+                You haven&apos;t submitted a deck yet. Your submissions will
+                appear here.
+              </p>
+              <Link href="/apply">
+                <Button
+                  variant="outline"
+                  className="rounded-none h-11 border-white/20 uppercase tracking-widest text-xs font-bold"
+                >
+                  Submit a Deck
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <div className="space-y-4">
+              {subs.map((s) => (
+                <div key={s.id} className="border border-border p-5">
+                  <div className="flex items-center justify-between gap-4 mb-2">
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                      {new Date(s.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="text-xs uppercase tracking-widest font-bold text-white border border-border px-2 py-1">
+                      {s.status}
+                    </span>
+                  </div>
+                  <p className="text-white text-sm mb-2 leading-relaxed">
+                    {s.description}
+                  </p>
+                  <a
+                    href={s.deckUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs uppercase tracking-widest text-muted-foreground hover:text-white underline break-all"
+                  >
+                    View deck
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <Button

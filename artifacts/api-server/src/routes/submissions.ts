@@ -3,10 +3,26 @@ import { db, submissionsTable } from "@workspace/db";
 import { CreateSubmissionBody } from "@workspace/api-zod";
 import { eq } from "drizzle-orm";
 import { verifyUSDCDeposit } from "../lib/verifyDeposit";
+import { getUser } from "../lib/auth";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 
 const router: IRouter = Router();
+
+// Return the submissions belonging to the logged-in account.
+router.get("/submissions/mine", async (req, res): Promise<void> => {
+  const user = await getUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  const mine = await db
+    .select()
+    .from(submissionsTable)
+    .where(eq(submissionsTable.userId, user.id))
+    .orderBy(submissionsTable.createdAt);
+  res.json(mine);
+});
 
 router.post("/submissions", async (req, res): Promise<void> => {
   const parsed = CreateSubmissionBody.safeParse(req.body);
