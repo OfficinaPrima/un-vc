@@ -13,6 +13,7 @@ export const submissionsTable = pgTable("submissions", {
   status: text("status").notNull().default("pending"),
   depositVerified: text("deposit_verified").notNull().default("false"),
   winner: boolean("winner").notNull().default(false),
+  removed: boolean("removed").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

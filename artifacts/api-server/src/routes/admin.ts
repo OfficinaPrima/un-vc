@@ -20,6 +20,46 @@ router.get("/admin/status", async (req, res): Promise<void> => {
   res.json({ isAdmin: !!user && ADMIN_USER_IDS.includes(user.id) });
 });
 
+// Admin sees ALL submissions, including booted ones.
+router.get("/admin/submissions", async (req, res): Promise<void> => {
+  const admin = await getAdmin(req);
+  if (!admin) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const all = await db
+    .select()
+    .from(submissionsTable)
+    .orderBy(submissionsTable.createdAt);
+  res.json(all);
+});
+
+// Boot (soft-remove) or reinstate a submission.
+router.post("/admin/remove", async (req, res): Promise<void> => {
+  const admin = await getAdmin(req);
+  if (!admin) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const submissionId = Number(req.body?.submissionId);
+  const removed = Boolean(req.body?.removed);
+  if (!submissionId || Number.isNaN(submissionId)) {
+    res.status(400).json({ error: "Valid submissionId is required" });
+    return;
+  }
+  const [updated] = await db
+    .update(submissionsTable)
+    .set({ removed })
+    .where(eq(submissionsTable.id, submissionId))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ error: "Submission not found" });
+    return;
+  }
+  req.log.info({ submissionId, removed }, "Submission boot state updated");
+  res.json(updated);
+});
+
 // Mark or unmark a submission as a lottery winner.
 router.post("/admin/winner", async (req, res): Promise<void> => {
   const admin = await getAdmin(req);

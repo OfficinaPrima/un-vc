@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, submissionsTable } from "@workspace/db";
 import { CreateSubmissionBody } from "@workspace/api-zod";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { verifyUSDCDeposit } from "../lib/verifyDeposit";
 import { getUser } from "../lib/auth";
 
@@ -112,13 +112,17 @@ router.post("/submissions", async (req, res): Promise<void> => {
 router.get("/submissions", async (req, res): Promise<void> => {
   const status = req.query["status"];
 
-  let query = db.select().from(submissionsTable);
-
+  // Public gallery never shows booted submissions.
+  const conditions = [eq(submissionsTable.removed, false)];
   if (status) {
-    query = query.where(eq(submissionsTable.status, String(status))) as typeof query;
+    conditions.push(eq(submissionsTable.status, String(status)));
   }
 
-  const submissions = await query.orderBy(submissionsTable.createdAt);
+  const submissions = await db
+    .select()
+    .from(submissionsTable)
+    .where(and(...conditions))
+    .orderBy(submissionsTable.createdAt);
   res.json(submissions);
 });
 

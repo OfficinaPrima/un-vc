@@ -51,7 +51,7 @@ router.post("/vote", async (req, res): Promise<void> => {
     .from(submissionsTable)
     .where(eq(submissionsTable.id, submissionId))
     .limit(1);
-  if (!target) {
+  if (!target || target.removed) {
     res.status(404).json({ error: "Submission not found" });
     return;
   }

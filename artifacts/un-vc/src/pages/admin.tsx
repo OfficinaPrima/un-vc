@@ -44,7 +44,7 @@ export default function Admin() {
     queryKey: ["admin-subs"],
     enabled: isAdmin,
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/submissions`);
+      const res = await authFetch("/api/admin/submissions");
       return (await res.json()) as any[];
     },
   });
@@ -64,6 +64,28 @@ export default function Admin() {
   const ranked = [...(subsQ.data ?? [])].sort(
     (a, b) => voteCountFor(b.id) - voteCountFor(a.id),
   );
+
+  async function toggleRemoved(submissionId: number, removed: boolean) {
+    try {
+      const res = await authFetch("/api/admin/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, removed }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Update failed");
+      }
+      toast({ title: removed ? "Project booted" : "Project reinstated" });
+      subsQ.refetch();
+    } catch (err) {
+      toast({
+        title: "Update failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  }
 
   async function toggleWinner(submissionId: number, winner: boolean) {
     try {
@@ -146,7 +168,11 @@ export default function Admin() {
               <div
                 key={s.id}
                 className={`border p-5 flex items-center gap-4 ${
-                  s.winner ? "border-green-400/50 bg-green-400/5" : "border-border"
+                  s.removed
+                    ? "border-red-500/40 bg-red-500/5 opacity-60"
+                    : s.winner
+                      ? "border-green-400/50 bg-green-400/5"
+                      : "border-border"
                 }`}
               >
                 <span className="text-xs uppercase tracking-widest text-muted-foreground w-8 shrink-0">
@@ -174,15 +200,31 @@ export default function Admin() {
                         <Trophy className="w-3 h-3" /> Winner
                       </span>
                     )}
+                    {s.removed && (
+                      <span className="text-red-400 font-bold">Booted</span>
+                    )}
                   </div>
                 </div>
-                <Button
-                  onClick={() => toggleWinner(s.id, !s.winner)}
-                  variant="outline"
-                  className="rounded-none h-10 shrink-0 border-white/20 uppercase tracking-widest text-xs font-bold"
-                >
-                  {s.winner ? "Unmark" : "Mark Winner"}
-                </Button>
+                <div className="flex flex-col gap-2 shrink-0">
+                  <Button
+                    onClick={() => toggleWinner(s.id, !s.winner)}
+                    variant="outline"
+                    className="rounded-none h-9 border-white/20 uppercase tracking-widest text-xs font-bold"
+                  >
+                    {s.winner ? "Unmark" : "Mark Winner"}
+                  </Button>
+                  <Button
+                    onClick={() => toggleRemoved(s.id, !s.removed)}
+                    variant="outline"
+                    className={`rounded-none h-9 uppercase tracking-widest text-xs font-bold ${
+                      s.removed
+                        ? "border-white/20"
+                        : "border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white"
+                    }`}
+                  >
+                    {s.removed ? "Reinstate" : "Boot"}
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
