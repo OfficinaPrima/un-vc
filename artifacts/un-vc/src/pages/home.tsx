@@ -164,7 +164,7 @@ export default function Home() {
 
       {/* Another Round of Incumbents */}
       <section className="px-6 md:px-12 lg:px-24 py-24 border-b border-border">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Another Round of Incumbents
           </p>
