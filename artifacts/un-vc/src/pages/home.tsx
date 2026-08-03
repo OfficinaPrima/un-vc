@@ -48,6 +48,14 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 mix-blend-difference">
         <div className="font-display font-bold text-2xl tracking-tighter text-white">UN-VC</div>
         <div className="flex items-center gap-4">
+          <Link href="/manifesto">
+            <Button
+              variant="ghost"
+              className="rounded-none text-white hover:bg-white hover:text-black transition-colors"
+            >
+              Manifesto
+            </Button>
+          </Link>
           <Link href={user ? "/profile" : "/login"}>
             <Button
               variant="ghost"
@@ -69,7 +77,7 @@ export default function Home() {
               variant="outline"
               className="rounded-none border-white/20 text-white hover:bg-white hover:text-black transition-colors"
             >
-              Apply to Pitch <span className="ml-2 text-xs opacity-50 uppercase tracking-widest">Beta</span>
+              Apply to Pitch
             </Button>
           </Link>
         </div>
@@ -339,7 +347,6 @@ export default function Home() {
         <div>© {new Date().getFullYear()} UN-VC. All rights reserved.</div>
         <div className="flex gap-8">
           <Link href="/manifesto" className="hover:text-white transition-colors">Manifesto</Link>
-          <a href="#" className="hover:text-white transition-colors">Twitter</a>
           <a href="#" className="hover:text-white transition-colors">Contact</a>
         </div>
       </footer>
