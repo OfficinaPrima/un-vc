@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
 import { API_BASE } from "@/config";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ArrowLeft,
   Wallet,
@@ -146,6 +147,14 @@ function NetworkStatusWidget() {
 
 export default function Apply() {
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  // Submitting requires an account — redirect anonymous visitors to login.
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/login");
+  }, [authLoading, user, navigate]);
+
   const [submitted, setSubmitted] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [deckUrl, setDeckUrl] = useState("");
@@ -203,6 +212,16 @@ export default function Apply() {
       },
     });
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background text-white flex items-center justify-center">
+        <p className="text-muted-foreground text-sm uppercase tracking-widest animate-pulse">
+          Loading...
+        </p>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (

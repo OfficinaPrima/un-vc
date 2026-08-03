@@ -33,36 +33,52 @@ router.post("/submissions", async (req, res): Promise<void> => {
 
   const data = parsed.data;
 
-  if (!FUND_WALLET) {
-    res.status(500).json({ error: "Fund wallet not configured" });
+  // Must be logged in to submit — this ties the deck to an account.
+  const user = await getUser(req);
+  if (!user) {
+    res.status(401).json({ error: "You must be logged in to submit a deck." });
     return;
   }
 
-  // 1. Verify USDC deposit before saving
-  let verification: Awaited<ReturnType<typeof verifyUSDCDeposit>>;
-  try {
-    verification = await verifyUSDCDeposit(data.walletAddress, FUND_WALLET);
-  } catch (error: any) {
-    req.log.error({ error: error.message, walletAddress: data.walletAddress }, "Deposit verification failed");
-    res.status(503).json({
-      error: "Deposit verification is temporarily unavailable. Please try again in a few minutes.",
-      retry: true,
-    });
-    return;
+  // Development test accounts may submit without a deposit. Everyone else must
+  // have a verified $50 USDC deposit. (Remove this allowlist before launch.)
+  const TEST_USER_IDS = ["722b6e63-9d77-4d52-980a-56c75fe2478e"];
+  const skipDeposit = TEST_USER_IDS.includes(user.id);
+
+  let verification: { verified: boolean; amount: number; txHash: string | null } = {
+    verified: true,
+    amount: 0,
+    txHash: null,
+  };
+
+  if (!skipDeposit) {
+    if (!FUND_WALLET) {
+      res.status(500).json({ error: "Fund wallet not configured" });
+      return;
+    }
+    try {
+      verification = await verifyUSDCDeposit(data.walletAddress, FUND_WALLET);
+    } catch (error: any) {
+      req.log.error({ error: error.message, walletAddress: data.walletAddress }, "Deposit verification failed");
+      res.status(503).json({
+        error: "Deposit verification is temporarily unavailable. Please try again in a few minutes.",
+        retry: true,
+      });
+      return;
+    }
+    if (!verification.verified) {
+      res.status(402).json({
+        error: "No verified $50 USDC deposit found from this wallet.",
+        detail: "Send exactly $50 USDC to the fund address shown on the apply page, then retry.",
+        amountFound: verification.amount,
+        required: 50,
+        retry: true,
+      });
+      return;
+    }
   }
 
-  if (!verification.verified) {
-    res.status(402).json({
-      error: "No verified $50 USDC deposit found from this wallet.",
-      detail: "Send exactly $50 USDC to the fund address shown on the apply page, then retry.",
-      amountFound: verification.amount,
-      required: 50,
-      retry: true,
-    });
-    return;
-  }
-
-  // 2. Check for duplicate wallet
+  // Check for duplicate wallet
   const existing = await db
     .select()
     .from(submissionsTable)
@@ -74,20 +90,21 @@ router.post("/submissions", async (req, res): Promise<void> => {
     return;
   }
 
-  // 3. Save submission with verified flag
+  // Save submission, tied to the account
   const [submission] = await db
     .insert(submissionsTable)
     .values({
+      userId: user.id,
       walletAddress: data.walletAddress,
       deckUrl: data.deckUrl,
       description: data.description,
       teamSize: data.teamSize,
       status: "pending",
-      depositVerified: "true",
+      depositVerified: skipDeposit ? "test" : "true",
     })
     .returning();
 
-  req.log.info({ walletAddress: data.walletAddress, txHash: verification.txHash }, "Submission created and deposit verified");
+  req.log.info({ userId: user.id, walletAddress: data.walletAddress, skipDeposit }, "Submission created");
   res.status(201).json({
     ...submission,
     depositAmount: verification.amount,
