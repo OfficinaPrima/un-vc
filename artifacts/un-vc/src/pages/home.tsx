@@ -223,7 +223,7 @@ export default function Home() {
 
       {/* The Problem Section */}
       <section className="px-6 md:px-12 lg:px-24 py-32 border-b border-border">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto text-center">
           <FadeIn>
             <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tighter uppercase text-white mb-8">
               VC Has Drifted.
@@ -236,7 +236,7 @@ export default function Home() {
             </p>
           </FadeIn>
           <FadeIn delay={0.2} className="mt-8">
-            <p className="text-lg text-muted-foreground/60 max-w-2xl">
+            <p className="text-lg text-muted-foreground/60 max-w-2xl mx-auto">
               Venture Capital has its methodology; this is simply a different road. A road built on pure entropy rather than pedigree.
             </p>
           </FadeIn>
