@@ -46,42 +46,32 @@ router.post("/submissions", async (req, res): Promise<void> => {
     return;
   }
 
-  // Development test accounts may submit without a deposit. Everyone else must
-  // have a verified $50 USDC deposit. (Remove this allowlist before launch.)
-  const TEST_USER_IDS = ["722b6e63-9d77-4d52-980a-56c75fe2478e"];
-  const skipDeposit = TEST_USER_IDS.includes(user.id);
+  // Every submission requires a verified $50 USDC deposit.
+  if (!FUND_WALLET) {
+    res.status(500).json({ error: "Fund wallet not configured" });
+    return;
+  }
 
-  let verification: { verified: boolean; amount: number; txHash: string | null } = {
-    verified: true,
-    amount: 0,
-    txHash: null,
-  };
-
-  if (!skipDeposit) {
-    if (!FUND_WALLET) {
-      res.status(500).json({ error: "Fund wallet not configured" });
-      return;
-    }
-    try {
-      verification = await verifyUSDCDeposit(data.walletAddress, FUND_WALLET);
-    } catch (error: any) {
-      req.log.error({ error: error.message, walletAddress: data.walletAddress }, "Deposit verification failed");
-      res.status(503).json({
-        error: "Deposit verification is temporarily unavailable. Please try again in a few minutes.",
-        retry: true,
-      });
-      return;
-    }
-    if (!verification.verified) {
-      res.status(402).json({
-        error: "No verified $50 USDC deposit found from this wallet.",
-        detail: "Send exactly $50 USDC to the fund address shown on the apply page, then retry.",
-        amountFound: verification.amount,
-        required: 50,
-        retry: true,
-      });
-      return;
-    }
+  let verification: { verified: boolean; amount: number; txHash: string | null };
+  try {
+    verification = await verifyUSDCDeposit(data.walletAddress, FUND_WALLET);
+  } catch (error: any) {
+    req.log.error({ error: error.message, walletAddress: data.walletAddress }, "Deposit verification failed");
+    res.status(503).json({
+      error: "Deposit verification is temporarily unavailable. Please try again in a few minutes.",
+      retry: true,
+    });
+    return;
+  }
+  if (!verification.verified) {
+    res.status(402).json({
+      error: "No verified $50 USDC deposit found from this wallet.",
+      detail: "Send exactly $50 USDC to the fund address shown on the apply page, then retry.",
+      amountFound: verification.amount,
+      required: 50,
+      retry: true,
+    });
+    return;
   }
 
   // Check for duplicate wallet
@@ -107,11 +97,11 @@ router.post("/submissions", async (req, res): Promise<void> => {
       description: data.description,
       teamSize: data.teamSize,
       status: "submitted",
-      depositVerified: skipDeposit ? "test" : "true",
+      depositVerified: "true",
     })
     .returning();
 
-  req.log.info({ userId: user.id, walletAddress: data.walletAddress, skipDeposit }, "Submission created");
+  req.log.info({ userId: user.id, walletAddress: data.walletAddress }, "Submission created");
   res.status(201).json({
     ...submission,
     depositAmount: verification.amount,

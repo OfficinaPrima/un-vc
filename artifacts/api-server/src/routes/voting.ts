@@ -6,8 +6,6 @@ import { getFundBalanceUsd } from "../lib/fundBalance";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 const TARGET_USD = 5000;
-// Test accounts may vote before the fund target is reached (dev only).
-const TEST_USER_IDS = ["722b6e63-9d77-4d52-980a-56c75fe2478e"];
 
 const router: IRouter = Router();
 
@@ -19,19 +17,16 @@ router.post("/vote", async (req, res): Promise<void> => {
     return;
   }
 
-  // Voting must be open (fund reached its target) — test accounts bypass this.
-  const isTester = TEST_USER_IDS.includes(user.id);
-  if (!isTester) {
-    try {
-      const balance = await getFundBalanceUsd(FUND_WALLET);
-      if (balance < TARGET_USD) {
-        res.status(403).json({ error: "Voting isn't open yet — the fund hasn't reached its target." });
-        return;
-      }
-    } catch {
-      res.status(503).json({ error: "Couldn't confirm voting status. Try again shortly." });
+  // Voting must be open (fund reached its target).
+  try {
+    const balance = await getFundBalanceUsd(FUND_WALLET);
+    if (balance < TARGET_USD) {
+      res.status(403).json({ error: "Voting isn't open yet — the fund hasn't reached its target." });
       return;
     }
+  } catch {
+    res.status(503).json({ error: "Couldn't confirm voting status. Try again shortly." });
+    return;
   }
 
   // Only founders who submitted a deck may vote.
