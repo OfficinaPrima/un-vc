@@ -169,7 +169,12 @@ export default function Submissions() {
                   key={sub.id}
                   className="border border-border bg-card p-6 flex flex-col gap-4 hover:border-white/30 transition-colors"
                 >
-                  {voteCountFor(sub.id) > 0 && rank < 10 && (
+                  {sub.winner && (
+                    <span className="self-start text-xs uppercase tracking-widest font-bold text-black bg-green-400 px-2 py-1">
+                      🏆 Lottery Winner
+                    </span>
+                  )}
+                  {!sub.winner && voteCountFor(sub.id) > 0 && rank < 10 && (
                     <span className="self-start text-xs uppercase tracking-widest font-bold text-black bg-white px-2 py-1">
                       #{rank + 1} · Top 10
                     </span>

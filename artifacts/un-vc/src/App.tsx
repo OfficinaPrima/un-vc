@@ -9,6 +9,7 @@ import Apply from "@/pages/apply";
 import Submissions from "@/pages/submissions";
 import Auth from "@/pages/auth";
 import Profile from "@/pages/profile";
+import Admin from "@/pages/admin";
 import { AuthProvider } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/submissions" component={Submissions} />
       <Route path="/login" component={Auth} />
       <Route path="/profile" component={Profile} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
