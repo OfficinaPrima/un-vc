@@ -231,7 +231,8 @@ export default function Apply() {
       setUploading(true);
       try {
         const safeName = deckFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `${user!.id}/${Date.now()}-${safeName}`;
+        // Random folder — keeps the account's user id out of the public URL.
+        const path = `${crypto.randomUUID()}/${safeName}`;
         const { error: upErr } = await supabase.storage
           .from("decks")
           .upload(path, deckFile, {
