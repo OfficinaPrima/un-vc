@@ -25,7 +25,15 @@ app.use(
     },
   }),
 );
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://officinaprima.github.io",
+      /^http:\/\/localhost:\d+$/,
+      /^http:\/\/127\.0\.0\.1:\d+$/,
+    ],
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

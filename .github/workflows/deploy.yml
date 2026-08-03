@@ -33,8 +33,29 @@ jobs:
           BASE_PATH: /un-vc/
           PORT: "3000"
           NODE_ENV: production
-      - name: SPA fallback for client-side routing
-        run: cp artifacts/un-vc/dist/public/index.html artifacts/un-vc/dist/public/404.html
+      - name: SPA fallback for client-side routing (redirect so deep links get HTTP 200)
+        run: |
+          cat > artifacts/un-vc/dist/public/404.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>UN-VC</title>
+              <script>
+                var pathSegmentsToKeep = 1;
+                var l = window.location;
+                l.replace(
+                  l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+                  l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+                  l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+                  (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+                  l.hash
+                );
+              </script>
+            </head>
+            <body></body>
+          </html>
+          EOF
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -28,6 +28,11 @@ if (!basePath) {
 
 export default defineConfig({
   base: basePath,
+  // Strip console noise from production bundles.
+  esbuild:
+    process.env.NODE_ENV === "production"
+      ? { drop: ["console", "debugger"] }
+      : undefined,
   plugins: [
     react(),
     tailwindcss(),
