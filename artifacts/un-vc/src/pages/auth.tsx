@@ -42,6 +42,17 @@ export default function Auth() {
     }
   }
 
+  async function handleGoogle() {
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + import.meta.env.BASE_URL,
+      },
+    });
+    if (error) setError(error.message);
+  }
+
   // Already signed in — show account state instead of the form.
   if (!loading && user) {
     return (
@@ -131,6 +142,22 @@ export default function Auth() {
                 : "Create Account"}
           </Button>
         </form>
+
+        <div className="flex items-center gap-4 my-6">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">
+            or
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogle}
+          className="w-full h-12 rounded-none border border-white/20 flex items-center justify-center gap-3 text-sm uppercase tracking-widest font-bold text-white hover:bg-white hover:text-black transition-colors"
+        >
+          Continue with Google
+        </button>
 
         <p className="text-sm text-muted-foreground mt-6 text-center">
           {mode === "login"
