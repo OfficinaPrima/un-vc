@@ -24,9 +24,30 @@ const FadeIn = ({ children, delay = 0, className = "", direction = "up" }: any) 
 
 const INCUMBENTS = [
   {
+    amount: "$65B",
+    phrase: "at a ~$965B valuation",
+    who: "Anthropic — founded by ex-OpenAI leaders",
+    source: "TechCrunch, May 2026",
+    url: "https://techcrunch.com/2026/05/28/anthropic-raises-65-billion-nears-1t-valuation-ahead-of-ipo/",
+  },
+  {
+    amount: "$1B+",
+    phrase: "at a ~$30B valuation, no product",
+    who: "Safe Superintelligence — Ilya Sutskever, ex-OpenAI",
+    source: "Benzinga",
+    url: "https://www.benzinga.com/tech/25/02/43772135/ex-openai-chief-scientist-ilya-sutskevers-ai-startup-valued-at-30-billion-in-latest-funding-round-report",
+  },
+  {
+    amount: "$2B",
+    phrase: "seed round — a $12B valuation",
+    who: "Thinking Machines — Mira Murati, ex-OpenAI CTO",
+    source: "TechCrunch",
+    url: "https://techcrunch.com/2025/07/15/mira-muratis-thinking-machines-lab-is-worth-12b-in-seed-round/",
+  },
+  {
     amount: "$2B",
     phrase: "for a startup still in talks",
-    who: "Miles Wang's AI drug-discovery startup — OpenAI researcher",
+    who: "Miles Wang's drug-discovery startup — OpenAI researcher",
     source: "TechCrunch, Jul 2026",
     url: "https://techcrunch.com/2026/07/14/openai-researcher-miles-wang-in-talks-to-launch-ai-drug-discovery-startup-valued-at-2b/",
   },
@@ -36,13 +57,6 @@ const INCUMBENTS = [
     who: "An ex-OpenAI researcher's startup",
     source: "The Information",
     url: "https://www.theinformation.com/articles/ex-openai-researchers-six-week-old-startup-targets-funding-4-billion-valuation",
-  },
-  {
-    amount: "$2B",
-    phrase: "seed round — a $12B valuation",
-    who: "Thinking Machines — Mira Murati, ex-OpenAI CTO",
-    source: "TechCrunch",
-    url: "https://techcrunch.com/2025/07/15/mira-muratis-thinking-machines-lab-is-worth-12b-in-seed-round/",
   },
   {
     amount: "$950M",
@@ -164,47 +178,47 @@ export default function Home() {
 
       {/* Another Round of Incumbents */}
       <section className="px-6 md:px-12 lg:px-24 py-24 border-b border-border">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mb-16">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Another Round of Incumbents
           </p>
           <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tighter uppercase text-white mb-6 leading-[1.05]">
             The billions keep flowing to people who already have everything.
           </h2>
-          <p className="text-lg text-muted-foreground font-light mb-14 max-w-2xl">
+          <p className="text-lg text-muted-foreground font-light max-w-2xl">
             Nine-figure checks for pedigree — often before there is even a product.
             Meanwhile, the founder with a real idea and no network never gets the call.
           </p>
-
-          <div className="space-y-10">
-            {INCUMBENTS.map((item, i) => (
-              <a
-                key={i}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block border-l-2 border-white pl-6 group"
-              >
-                <div className="font-display text-4xl md:text-5xl font-bold text-white leading-none">
-                  {item.amount}{" "}
-                  <span className="text-base md:text-lg text-muted-foreground font-light">
-                    {item.phrase}
-                  </span>
-                </div>
-                <div className="text-sm text-muted-foreground mt-3">
-                  {item.who} ·{" "}
-                  <span className="text-white group-hover:underline">
-                    {item.source} ↗
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-
-          <p className="mt-14 text-xl md:text-2xl text-white font-light">
-            This is the system. UN-VC is the other road.
-          </p>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
+          {INCUMBENTS.map((item, i) => (
+            <a
+              key={i}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-background p-8 md:p-12 flex flex-col group"
+            >
+              <span className="text-xs uppercase tracking-widest text-muted-foreground mb-6 font-mono">
+                {item.source} <span className="opacity-60">↗</span>
+              </span>
+              <h3 className="font-display text-4xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
+                {item.amount}
+              </h3>
+              <p className="text-sm text-muted-foreground/70 mb-6">
+                {item.phrase}
+              </p>
+              <p className="text-muted-foreground font-light leading-relaxed mt-auto">
+                {item.who}
+              </p>
+            </a>
+          ))}
+        </div>
+
+        <p className="mt-16 text-xl md:text-2xl text-white font-light max-w-4xl">
+          This is the system. UN-VC is the other road.
+        </p>
       </section>
 
       {/* The Problem Section */}
