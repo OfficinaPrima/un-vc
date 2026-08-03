@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
 import { API_BASE } from "@/config";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabase";
 import {
   ArrowLeft,
   Wallet,
@@ -159,6 +160,8 @@ export default function Apply() {
   const [walletAddress, setWalletAddress] = useState("");
   const [deckUrl, setDeckUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [deckFile, setDeckFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const copyAddress = () => {
@@ -192,21 +195,71 @@ export default function Apply() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!walletAddress || !deckUrl || !description) {
+    if (!walletAddress || !description || (!deckUrl && !deckFile)) {
       toast({
         title: "Missing fields",
-        description: "Please fill in all fields.",
+        description:
+          "Fill in your wallet and a description, and either upload a deck or paste a link.",
         variant: "destructive",
       });
       return;
     }
 
+    let finalDeckUrl = deckUrl;
+
+    // If a file was chosen, validate and upload it to Supabase Storage.
+    if (deckFile) {
+      if (deckFile.type !== "application/pdf") {
+        toast({
+          title: "PDF only",
+          description: "Please upload your deck as a PDF file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (deckFile.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Your deck must be 10MB or smaller.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setUploading(true);
+      try {
+        const safeName = deckFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${user!.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("decks")
+          .upload(path, deckFile, {
+            contentType: "application/pdf",
+            upsert: false,
+          });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("decks").getPublicUrl(path);
+        finalDeckUrl = pub.publicUrl;
+      } catch (err) {
+        setUploading(false);
+        toast({
+          title: "Upload failed",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Could not upload your deck. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setUploading(false);
+    }
+
     mutation.mutate({
       data: {
         walletAddress,
-        deckUrl,
+        deckUrl: finalDeckUrl,
         description,
         teamSize: 1,
       },
@@ -373,7 +426,26 @@ export default function Apply() {
                 className="rounded-none h-14 bg-card border-border text-white px-6 placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-white focus-visible:border-white"
               />
               <p className="text-xs text-muted-foreground">
-                Link to your pitch deck (YouTube, DocSend, or any publicly accessible URL).
+                Link to your pitch deck (YouTube, DocSend, or any publicly accessible URL) — or upload a PDF below.
+              </p>
+            </div>
+
+            {/* Deck file upload */}
+            <div className="space-y-3">
+              <label className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
+                Or Upload Deck (PDF)
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setDeckFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-3 file:px-6 file:border file:border-border file:bg-card file:text-white file:uppercase file:tracking-widest file:text-xs file:font-bold hover:file:bg-white hover:file:text-black file:cursor-pointer cursor-pointer"
+              />
+              <p className="text-xs text-muted-foreground">
+                PDF only, 10MB max.{" "}
+                {deckFile
+                  ? `Selected: ${deckFile.name}`
+                  : "Upload a file or paste a link above — either works."}
               </p>
             </div>
 
@@ -398,10 +470,15 @@ export default function Apply() {
               <Button
                 type="submit"
                 size="lg"
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || uploading}
                 className="rounded-none bg-white text-black hover:bg-white/90 h-14 px-8 text-sm uppercase tracking-widest font-bold w-full sm:w-auto"
               >
-                {mutation.isPending ? (
+                {uploading ? (
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Uploading deck...
+                  </span>
+                ) : mutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin" />
                     Verifying deposit...
