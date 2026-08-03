@@ -74,6 +74,11 @@ export default function Submissions() {
   const voteCountFor = (id: number) =>
     votesQuery.data?.find((v) => v.submissionId === id)?.voteCount ?? 0;
 
+  // Rank submissions by votes (most first) so the top 10 rise to the top.
+  const ranked = [...((submissions as any[]) ?? [])].sort(
+    (a, b) => voteCountFor(b.id) - voteCountFor(a.id),
+  );
+
   async function castVote(submissionId: number) {
     setVoting(submissionId);
     try {
@@ -126,7 +131,7 @@ export default function Submissions() {
             Submissions.
           </h1>
           <p className="text-lg text-muted-foreground font-light mb-12 leading-relaxed max-w-2xl">
-            Browse all pitch deck submissions. Deposits are verified on-chain before voting begins.
+            Browse all submissions, ranked by community votes. When voting opens, the top 10 advance to the real-world lottery.
           </p>
         </FadeIn>
 
@@ -157,13 +162,18 @@ export default function Submissions() {
             </div>
           )}
 
-          {submissions && submissions.length > 0 && (
+          {ranked.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {submissions.map((sub: any) => (
+              {ranked.map((sub: any, rank: number) => (
                 <div
                   key={sub.id}
                   className="border border-border bg-card p-6 flex flex-col gap-4 hover:border-white/30 transition-colors"
                 >
+                  {voteCountFor(sub.id) > 0 && rank < 10 && (
+                    <span className="self-start text-xs uppercase tracking-widest font-bold text-black bg-white px-2 py-1">
+                      #{rank + 1} · Top 10
+                    </span>
+                  )}
                   {sub.thumbnailUrl && (
                     <img
                       src={sub.thumbnailUrl}
