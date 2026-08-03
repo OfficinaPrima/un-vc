@@ -3,6 +3,7 @@ import { db, votesTable, submissionsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { getUser } from "../lib/auth";
 import { getFundBalanceUsd } from "../lib/fundBalance";
+import { isBanned, computeVotingOpen } from "../lib/adminState";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 const TARGET_USD = 5000;
@@ -17,11 +18,16 @@ router.post("/vote", async (req, res): Promise<void> => {
     return;
   }
 
-  // Voting must be open (fund reached its target).
+  if (await isBanned(user.id)) {
+    res.status(403).json({ error: "Your account has been suspended." });
+    return;
+  }
+
+  // Voting must be open (fund reached its target, or admin override).
   try {
     const balance = await getFundBalanceUsd(FUND_WALLET);
-    if (balance < TARGET_USD) {
-      res.status(403).json({ error: "Voting isn't open yet — the fund hasn't reached its target." });
+    if (!(await computeVotingOpen(balance, TARGET_USD))) {
+      res.status(403).json({ error: "Voting isn't open yet." });
       return;
     }
   } catch {

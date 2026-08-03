@@ -58,6 +58,24 @@ export default function Admin() {
     },
   });
 
+  const bannedQ = useQuery({
+    queryKey: ["admin-banned"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const res = await authFetch("/api/admin/banned");
+      return (await res.json()) as string[];
+    },
+  });
+
+  const fundQ = useQuery({
+    queryKey: ["fund-status"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/api/fund-status`);
+      return (await res.json()) as { votingMode: string; votingOpen: boolean };
+    },
+  });
+
   const voteCountFor = (id: number) =>
     votesQ.data?.find((v) => v.submissionId === id)?.voteCount ?? 0;
 
@@ -81,6 +99,65 @@ export default function Admin() {
     } catch (err) {
       toast({
         title: "Update failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function toggleBan(userId: string, banned: boolean) {
+    if (!userId) return;
+    try {
+      const res = await authFetch("/api/admin/ban", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, banned }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast({ title: banned ? "User banned" : "User unbanned" });
+      bannedQ.refetch();
+    } catch (err) {
+      toast({
+        title: "Update failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function changeVotingMode(mode: string) {
+    try {
+      const res = await authFetch("/api/admin/voting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast({ title: `Voting set to "${mode}"` });
+      fundQ.refetch();
+    } catch (err) {
+      toast({
+        title: "Update failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function exportCsv() {
+    try {
+      const res = await authFetch("/api/admin/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "un-vc-submissions.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast({
+        title: "Export failed",
         description: err instanceof Error ? err.message : "Try again.",
         variant: "destructive",
       });
@@ -151,10 +228,43 @@ export default function Admin() {
         <h1 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-2">
           Admin
         </h1>
-        <p className="text-muted-foreground mb-12 text-sm">
+        <p className="text-muted-foreground mb-8 text-sm">
           All submissions, ranked by votes. Mark the real-world lottery
           winner(s).
         </p>
+
+        <div className="border border-border p-6 mb-10 flex flex-col sm:flex-row sm:items-center gap-6 justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
+              Voting
+            </p>
+            <div className="flex gap-2">
+              {(["auto", "open", "closed"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => changeVotingMode(m)}
+                  className={`px-4 py-2 text-xs uppercase tracking-widest font-bold border transition-colors ${
+                    fundQ.data?.votingMode === m
+                      ? "bg-white text-black border-white"
+                      : "border-white/20 text-muted-foreground hover:text-white"
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Auto opens voting at $5,000. Open / Closed override it.
+            </p>
+          </div>
+          <Button
+            onClick={exportCsv}
+            variant="outline"
+            className="rounded-none h-11 shrink-0 border-white/20 uppercase tracking-widest text-xs font-bold"
+          >
+            Export CSV
+          </Button>
+        </div>
 
         {subsQ.isLoading ? (
           <p className="text-muted-foreground text-sm animate-pulse">
@@ -203,6 +313,9 @@ export default function Admin() {
                     {s.removed && (
                       <span className="text-red-400 font-bold">Booted</span>
                     )}
+                    {bannedQ.data?.includes(s.userId) && (
+                      <span className="text-red-400 font-bold">User banned</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
@@ -223,6 +336,19 @@ export default function Admin() {
                     }`}
                   >
                     {s.removed ? "Reinstate" : "Boot"}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      toggleBan(s.userId, !bannedQ.data?.includes(s.userId))
+                    }
+                    variant="outline"
+                    className={`rounded-none h-9 uppercase tracking-widest text-xs font-bold ${
+                      bannedQ.data?.includes(s.userId)
+                        ? "border-white/20"
+                        : "border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white"
+                    }`}
+                  >
+                    {bannedQ.data?.includes(s.userId) ? "Unban" : "Ban User"}
                   </Button>
                 </div>
               </div>

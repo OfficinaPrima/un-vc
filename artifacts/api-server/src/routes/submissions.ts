@@ -4,6 +4,7 @@ import { CreateSubmissionBody } from "@workspace/api-zod";
 import { eq, and } from "drizzle-orm";
 import { verifyUSDCDeposit } from "../lib/verifyDeposit";
 import { getUser } from "../lib/auth";
+import { isBanned } from "../lib/adminState";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 
@@ -43,6 +44,11 @@ router.post("/submissions", async (req, res): Promise<void> => {
   const user = await getUser(req);
   if (!user) {
     res.status(401).json({ error: "You must be logged in to submit a deck." });
+    return;
+  }
+
+  if (await isBanned(user.id)) {
+    res.status(403).json({ error: "Your account has been suspended." });
     return;
   }
 

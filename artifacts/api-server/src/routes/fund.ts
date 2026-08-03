@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { getFundBalanceUsd } from "../lib/fundBalance";
+import { computeVotingOpen, getVotingMode } from "../lib/adminState";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 const TARGET_USD = 5000; // Fund 1 target
@@ -14,10 +15,13 @@ router.get("/fund-status", async (req, res): Promise<void> => {
   }
   try {
     const balanceUsd = await getFundBalanceUsd(FUND_WALLET);
+    const votingOpen = await computeVotingOpen(balanceUsd, TARGET_USD);
+    const votingMode = await getVotingMode();
     res.json({
       balanceUsd,
       targetUsd: TARGET_USD,
-      votingOpen: balanceUsd >= TARGET_USD,
+      votingOpen,
+      votingMode,
     });
   } catch (err: any) {
     req.log.error({ error: err.message }, "Fund status fetch failed");
