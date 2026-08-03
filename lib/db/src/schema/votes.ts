@@ -3,6 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 
 export const votesTable = pgTable("votes", {
   id: serial("id").primaryKey(),
+  voterUserId: text("voter_user_id"),
   voterWallet: text("voter_wallet").notNull(),
   submissionId: integer("submission_id").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

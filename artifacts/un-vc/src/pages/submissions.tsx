@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Wallet, CheckCircle2, CircleDashed } from "lucide-react";
 import { useGetSubmissions } from "@workspace/api-client-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { API_BASE } from "@/config";
 
 const FadeIn = ({ children, delay = 0, className = "" }: any) => {
   return (
@@ -23,8 +28,81 @@ function truncateWallet(addr: string) {
   return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
+type VoteCount = { submissionId: number; voteCount: number };
+
 export default function Submissions() {
   const { data: submissions, isLoading, isError } = useGetSubmissions();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [voting, setVoting] = useState<number | null>(null);
+
+  const votesQuery = useQuery({
+    queryKey: ["votes"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/api/votes`);
+      if (!res.ok) throw new Error("Failed to load votes");
+      return (await res.json()) as VoteCount[];
+    },
+    refetchInterval: 30000,
+  });
+
+  const fundQuery = useQuery({
+    queryKey: ["fund-status"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/api/fund-status`);
+      if (!res.ok) throw new Error("Failed to load fund status");
+      return (await res.json()) as { votingOpen: boolean };
+    },
+  });
+
+  const myVoteQuery = useQuery({
+    queryKey: ["my-vote", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch(`${API_BASE}/api/votes/mine`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) return { submissionId: null as number | null };
+      return (await res.json()) as { submissionId: number | null };
+    },
+  });
+
+  const votingOpen = fundQuery.data?.votingOpen ?? false;
+  const myVote = myVoteQuery.data?.submissionId ?? null;
+
+  const voteCountFor = (id: number) =>
+    votesQuery.data?.find((v) => v.submissionId === id)?.voteCount ?? 0;
+
+  async function castVote(submissionId: number) {
+    setVoting(submissionId);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch(`${API_BASE}/api/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ submissionId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Could not cast your vote.");
+      }
+      toast({ title: "Vote cast", description: "Thanks — your vote is in." });
+      votesQuery.refetch();
+      myVoteQuery.refetch();
+    } catch (err) {
+      toast({
+        title: "Vote failed",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVoting(null);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -113,7 +191,36 @@ export default function Submissions() {
                     {sub.description}
                   </p>
 
-                  <div className="flex items-center justify-end pt-2 border-t border-border mt-auto">
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-border mt-auto">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                        {voteCountFor(sub.id)} {voteCountFor(sub.id) === 1 ? "vote" : "votes"}
+                      </span>
+                      {!user ? (
+                        <Link
+                          href="/login"
+                          className="text-xs uppercase tracking-widest text-muted-foreground hover:text-white underline"
+                        >
+                          Log in to vote
+                        </Link>
+                      ) : myVote === sub.id ? (
+                        <span className="text-xs uppercase tracking-widest text-green-400 font-bold">
+                          Voted ✓
+                        </span>
+                      ) : myVote !== null ? (
+                        <span className="text-xs uppercase tracking-widest text-muted-foreground/50">
+                          Vote used
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => castVote(sub.id)}
+                          disabled={voting !== null}
+                          className="text-xs uppercase tracking-widest font-bold text-white border border-white/30 px-3 py-1 hover:bg-white hover:text-black transition-colors disabled:opacity-40"
+                        >
+                          {voting === sub.id ? "Voting..." : "Vote"}
+                        </button>
+                      )}
+                    </div>
                     <a
                       href={sub.deckUrl}
                       target="_blank"
