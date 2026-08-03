@@ -96,8 +96,8 @@ export default function Submissions() {
                         <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-yellow-400 uppercase tracking-widest">
-                        <CircleDashed className="w-3 h-3" /> Pending
+                      <span className="inline-flex items-center gap-1 text-xs text-green-400 uppercase tracking-widest">
+                        <CheckCircle2 className="w-3 h-3" /> Submitted
                       </span>
                     )}
                   </div>
@@ -106,10 +106,7 @@ export default function Submissions() {
                     {sub.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-border mt-auto">
-                    <span className="text-xs text-muted-foreground uppercase tracking-widest">
-                      {sub.status}
-                    </span>
+                  <div className="flex items-center justify-end pt-2 border-t border-border mt-auto">
                     <a
                       href={sub.deckUrl}
                       target="_blank"

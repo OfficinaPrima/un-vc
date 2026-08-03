@@ -99,7 +99,7 @@ router.post("/submissions", async (req, res): Promise<void> => {
       deckUrl: data.deckUrl,
       description: data.description,
       teamSize: data.teamSize,
-      status: "pending",
+      status: "submitted",
       depositVerified: skipDeposit ? "test" : "true",
     })
     .returning();

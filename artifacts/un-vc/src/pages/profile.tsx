@@ -181,8 +181,8 @@ export default function Profile() {
                     <span className="text-xs uppercase tracking-widest text-muted-foreground">
                       {new Date(s.createdAt).toLocaleDateString()}
                     </span>
-                    <span className="text-xs uppercase tracking-widest font-bold text-white border border-border px-2 py-1">
-                      {s.status}
+                    <span className="text-xs uppercase tracking-widest font-bold text-green-400 border border-green-400/30 px-2 py-1">
+                      Submitted
                     </span>
                   </div>
                   <p className="text-white text-sm mb-2 leading-relaxed">
