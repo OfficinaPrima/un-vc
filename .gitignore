@@ -58,3 +58,7 @@ un-vc-chat-history.md
 
 # Zip archives (un-vc-project.zip smuggles .replit/ADMIN_SECRET + chat history)
 *.zip
+
+# PDFs (decks, exports) — keep out of the repo
+*.pdf
+"UN-VC Deckpdf"
