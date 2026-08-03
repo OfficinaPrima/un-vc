@@ -12,6 +12,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
   const [, navigate] = useLocation();
   const { user, signOut, loading } = useAuth();
 
@@ -21,8 +22,13 @@ export default function Auth() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
+        // If email confirmation is on, there's no session yet — user must verify.
+        if (!data.session) {
+          setConfirmSent(true);
+          return;
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -51,6 +57,30 @@ export default function Auth() {
       },
     });
     if (error) setError(error.message);
+  }
+
+  // After signup with email confirmation on — tell them to check their inbox.
+  if (confirmSent) {
+    return (
+      <div className="min-h-screen bg-background text-white flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-full max-w-md space-y-6">
+          <h1 className="font-display text-3xl font-bold uppercase tracking-tighter">
+            Check your email
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            We sent a confirmation link to{" "}
+            <span className="text-white break-all">{email}</span>. Click it to
+            activate your account, then come back and log in.
+          </p>
+          <Link
+            href="/"
+            className="inline-block text-sm uppercase tracking-widest underline text-muted-foreground hover:text-white"
+          >
+            Back to site
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   // Already signed in — show account state instead of the form.
