@@ -146,6 +146,39 @@ function NetworkStatusWidget() {
   );
 }
 
+// Resize an image down to a small thumbnail (max 400px wide, JPEG) so stored
+// thumbnails stay tiny regardless of the original file size.
+async function shrinkImage(file: File): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = document.createElement("img");
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.src = url;
+    });
+    const maxW = 400;
+    const scale = Math.min(1, maxW / img.width);
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas not supported");
+    ctx.drawImage(img, 0, 0, w, h);
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("Could not process image"))),
+        "image/jpeg",
+        0.7,
+      );
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export default function Apply() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
@@ -161,6 +194,7 @@ export default function Apply() {
   const [deckUrl, setDeckUrl] = useState("");
   const [description, setDescription] = useState("");
   const [deckFile, setDeckFile] = useState<File | null>(null);
+  const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -257,13 +291,51 @@ export default function Apply() {
       setUploading(false);
     }
 
+    // Optional thumbnail — shrink to a small JPEG and upload.
+    let thumbnailUrl: string | null = null;
+    if (thumbFile) {
+      if (!thumbFile.type.startsWith("image/")) {
+        toast({
+          title: "Image only",
+          description: "The thumbnail must be an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setUploading(true);
+      try {
+        const blob = await shrinkImage(thumbFile);
+        const tPath = `${crypto.randomUUID()}.jpg`;
+        const { error: tErr } = await supabase.storage
+          .from("thumbnails")
+          .upload(tPath, blob, { contentType: "image/jpeg", upsert: false });
+        if (tErr) throw tErr;
+        thumbnailUrl = supabase.storage
+          .from("thumbnails")
+          .getPublicUrl(tPath).data.publicUrl;
+      } catch (err) {
+        setUploading(false);
+        toast({
+          title: "Thumbnail upload failed",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Could not upload the thumbnail. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setUploading(false);
+    }
+
     mutation.mutate({
       data: {
         walletAddress,
         deckUrl: finalDeckUrl,
         description,
         teamSize: 1,
-      },
+        thumbnailUrl,
+      } as any,
     });
   };
 
@@ -447,6 +519,25 @@ export default function Apply() {
                 {deckFile
                   ? `Selected: ${deckFile.name}`
                   : "Upload a file or paste a link above — either works."}
+              </p>
+            </div>
+
+            {/* Thumbnail (optional) */}
+            <div className="space-y-3">
+              <label className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
+                Thumbnail (optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setThumbFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-3 file:px-6 file:border file:border-border file:bg-card file:text-white file:uppercase file:tracking-widest file:text-xs file:font-bold hover:file:bg-white hover:file:text-black file:cursor-pointer cursor-pointer"
+              />
+              <p className="text-xs text-muted-foreground">
+                A small image for your gallery card.{" "}
+                {thumbFile
+                  ? `Selected: ${thumbFile.name}`
+                  : "Optional — it's shrunk automatically to stay tiny."}
               </p>
             </div>
 

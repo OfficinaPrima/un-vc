@@ -86,6 +86,13 @@ export default function Submissions() {
                   key={sub.id}
                   className="border border-border bg-card p-6 flex flex-col gap-4 hover:border-white/30 transition-colors"
                 >
+                  {sub.thumbnailUrl && (
+                    <img
+                      src={sub.thumbnailUrl}
+                      alt=""
+                      className="w-full h-32 object-cover border border-border"
+                    />
+                  )}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Wallet className="w-4 h-4" />

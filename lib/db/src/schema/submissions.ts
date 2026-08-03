@@ -7,6 +7,7 @@ export const submissionsTable = pgTable("submissions", {
   userId: text("user_id"),
   walletAddress: text("wallet_address").notNull(),
   deckUrl: text("deck_url").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
   description: text("description").notNull(),
   teamSize: integer("team_size").notNull(),
   status: text("status").notNull().default("pending"),

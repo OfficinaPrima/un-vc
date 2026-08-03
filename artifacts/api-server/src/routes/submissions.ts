@@ -33,6 +33,12 @@ router.post("/submissions", async (req, res): Promise<void> => {
 
   const data = parsed.data;
 
+  // Optional thumbnail URL (not part of the generated schema, read directly).
+  const thumbnailUrl =
+    typeof req.body?.thumbnailUrl === "string" && req.body.thumbnailUrl
+      ? req.body.thumbnailUrl
+      : null;
+
   // Must be logged in to submit — this ties the deck to an account.
   const user = await getUser(req);
   if (!user) {
@@ -97,6 +103,7 @@ router.post("/submissions", async (req, res): Promise<void> => {
       userId: user.id,
       walletAddress: data.walletAddress,
       deckUrl: data.deckUrl,
+      thumbnailUrl,
       description: data.description,
       teamSize: data.teamSize,
       status: "submitted",
