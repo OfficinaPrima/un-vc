@@ -9,16 +9,6 @@ export interface HealthStatus {
   status: string;
 }
 
-export interface WaitlistInput {
-  email: string;
-}
-
-export interface WaitlistEntry {
-  id: number;
-  email: string;
-  createdAt: string;
-}
-
 export interface Error {
   error: string;
 }
@@ -32,12 +22,15 @@ export interface SubmissionInput {
   description: string;
   /** Number of team members */
   teamSize: number;
+  /** Optional uploaded thumbnail image URL */
+  thumbnailUrl?: string;
 }
 
 export interface Submission {
   id: number;
   walletAddress: string;
   deckUrl: string;
+  thumbnailUrl?: string;
   description: string;
   teamSize: number;
   status: string;
@@ -45,26 +38,6 @@ export interface Submission {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface VerifyDepositInput {
-  /** Wallet address to check for USDC deposit */
-  walletAddress: string;
-}
-
-export interface VerifyDepositResult {
-  verified: boolean;
-  amount: number;
-  txHash?: string;
-  blockNumber?: number;
-  status: string;
-}
-
-export type GetWaitlistParams = {
-/**
- * Admin secret key
- */
-key: string;
-};
 
 export type GetSubmissionsParams = {
 /**

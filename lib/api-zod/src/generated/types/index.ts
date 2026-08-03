@@ -8,11 +8,6 @@
 
 export * from './error';
 export * from './getSubmissionsParams';
-export * from './getWaitlistParams';
 export * from './healthStatus';
 export * from './submission';
 export * from './submissionInput';
-export * from './verifyDepositInput';
-export * from './verifyDepositResult';
-export * from './waitlistEntry';
-export * from './waitlistInput';

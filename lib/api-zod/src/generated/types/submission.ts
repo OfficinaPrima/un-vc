@@ -10,6 +10,7 @@ export interface Submission {
   id: number;
   walletAddress: string;
   deckUrl: string;
+  thumbnailUrl?: string;
   description: string;
   teamSize: number;
   status: string;

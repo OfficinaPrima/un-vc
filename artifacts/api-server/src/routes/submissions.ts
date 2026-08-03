@@ -8,6 +8,19 @@ import { isBanned } from "../lib/adminState";
 
 const FUND_WALLET = process.env.FUND_WALLET_ADDRESS || "";
 
+// Only allow real web links for decks, and thumbnails only from our own bucket.
+const THUMBNAIL_PREFIX =
+  "https://mnawrtomfagillerceer.supabase.co/storage/v1/object/public/thumbnails/";
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 const router: IRouter = Router();
 
 // Return the submissions belonging to the logged-in account.
@@ -34,11 +47,21 @@ router.post("/submissions", async (req, res): Promise<void> => {
 
   const data = parsed.data;
 
-  // Optional thumbnail URL (not part of the generated schema, read directly).
-  const thumbnailUrl =
+  if (!isHttpUrl(data.deckUrl)) {
+    res.status(400).json({ error: "deckUrl must be a valid http(s) link." });
+    return;
+  }
+
+  // Optional thumbnail URL — must point at our own storage bucket.
+  const rawThumbnail =
     typeof req.body?.thumbnailUrl === "string" && req.body.thumbnailUrl
       ? req.body.thumbnailUrl
       : null;
+  if (rawThumbnail && !rawThumbnail.startsWith(THUMBNAIL_PREFIX)) {
+    res.status(400).json({ error: "thumbnailUrl must be an uploaded thumbnail." });
+    return;
+  }
+  const thumbnailUrl = rawThumbnail;
 
   // Must be logged in to submit — this ties the deck to an account.
   const user = await getUser(req);
@@ -58,7 +81,7 @@ router.post("/submissions", async (req, res): Promise<void> => {
     return;
   }
 
-  let verification: { verified: boolean; amount: number; txHash: string | null };
+  let verification: Awaited<ReturnType<typeof verifyUSDCDeposit>>;
   try {
     verification = await verifyUSDCDeposit(data.walletAddress, FUND_WALLET);
   } catch (error: any) {
@@ -129,40 +152,8 @@ router.get("/submissions", async (req, res): Promise<void> => {
     .from(submissionsTable)
     .where(and(...conditions))
     .orderBy(submissionsTable.createdAt);
-  res.json(submissions);
-});
-
-router.post("/submissions/verify", async (req, res): Promise<void> => {
-  const walletAddress = req.body?.walletAddress as string;
-  if (!walletAddress || !walletAddress.startsWith("0x")) {
-    res.status(400).json({ error: "Valid walletAddress is required" });
-    return;
-  }
-
-  if (!FUND_WALLET) {
-    res.status(500).json({ error: "Fund wallet not configured" });
-    return;
-  }
-
-  try {
-    const result = await verifyUSDCDeposit(walletAddress, FUND_WALLET);
-
-    // Update submission in DB if verified
-    if (result.verified) {
-      await db
-        .update(submissionsTable)
-        .set({ depositVerified: "true" })
-        .where(eq(submissionsTable.walletAddress, walletAddress));
-    }
-
-    res.json({
-      ...result,
-      status: result.verified ? "verified" : "unverified",
-    });
-  } catch (error: any) {
-    req.log.error({ error: error.message, walletAddress }, "Deposit verification failed");
-    res.status(500).json({ error: "Failed to verify deposit. Please try again." });
-  }
+  // Never expose account ids publicly.
+  res.json(submissions.map(({ userId: _userId, ...pub }) => pub));
 });
 
 export default router;

@@ -334,8 +334,8 @@ export default function Apply() {
         deckUrl: finalDeckUrl,
         description,
         teamSize: 1,
-        thumbnailUrl,
-      } as any,
+        ...(thumbnailUrl ? { thumbnailUrl } : {}),
+      },
     });
   };
 

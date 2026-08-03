@@ -162,7 +162,12 @@ router.get("/admin/export", async (req, res): Promise<void> => {
     .groupBy(votesTable.submissionId);
   const votesById = new Map(voteRows.map((v) => [v.submissionId, v.voteCount]));
 
-  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  // Quote cells and defuse spreadsheet formula injection (=, +, -, @ prefixes).
+  const esc = (v: unknown) => {
+    let s = String(v ?? "").replace(/"/g, '""');
+    if (/^[=+\-@]/.test(s)) s = `'${s}`;
+    return `"${s}"`;
+  };
   const header = [
     "id",
     "createdAt",

@@ -15,4 +15,6 @@ export interface SubmissionInput {
   description: string;
   /** Number of team members */
   teamSize: number;
+  /** Optional uploaded thumbnail image URL */
+  thumbnailUrl?: string;
 }

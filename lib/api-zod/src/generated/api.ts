@@ -18,39 +18,15 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Submit an email to join the waitlist
- * @summary Join the waitlist
- */
-export const CreateWaitlistEntryBody = zod.object({
-  "email": zod.string().email()
-})
-
-
-/**
- * Returns all waitlist entries. Requires admin key.
- * @summary Get all waitlist entries
- */
-export const GetWaitlistQueryParams = zod.object({
-  "key": zod.coerce.string().describe('Admin secret key')
-})
-
-export const GetWaitlistResponseItem = zod.object({
-  "id": zod.number(),
-  "email": zod.string(),
-  "createdAt": zod.coerce.date()
-})
-export const GetWaitlistResponse = zod.array(GetWaitlistResponseItem)
-
-
-/**
  * Submit a pitch deck with wallet address and details
  * @summary Submit a pitch deck
  */
 export const CreateSubmissionBody = zod.object({
   "walletAddress": zod.string().describe('The connected wallet address'),
-  "deckUrl": zod.string().describe('URL to the pitch deck (YouTube, DocSend, etc.)'),
+  "deckUrl": zod.string().url().describe('URL to the pitch deck (YouTube, DocSend, etc.)'),
   "description": zod.string().describe('Brief description of the project'),
-  "teamSize": zod.number().describe('Number of team members')
+  "teamSize": zod.number().describe('Number of team members'),
+  "thumbnailUrl": zod.string().url().optional().describe('Optional uploaded thumbnail image URL')
 })
 
 
@@ -66,6 +42,7 @@ export const GetSubmissionsResponseItem = zod.object({
   "id": zod.number(),
   "walletAddress": zod.string(),
   "deckUrl": zod.string(),
+  "thumbnailUrl": zod.string().optional(),
   "description": zod.string(),
   "teamSize": zod.number(),
   "status": zod.string(),
@@ -74,22 +51,5 @@ export const GetSubmissionsResponseItem = zod.object({
   "updatedAt": zod.coerce.date()
 })
 export const GetSubmissionsResponse = zod.array(GetSubmissionsResponseItem)
-
-
-/**
- * Check if a wallet has sent >= $50 USDC to the fund wallet
- * @summary Verify USDC deposit
- */
-export const VerifyDepositBody = zod.object({
-  "walletAddress": zod.string().describe('Wallet address to check for USDC deposit')
-})
-
-export const VerifyDepositResponse = zod.object({
-  "verified": zod.boolean(),
-  "amount": zod.number(),
-  "txHash": zod.string().optional(),
-  "blockNumber": zod.number().optional(),
-  "status": zod.string()
-})
 
 
