@@ -22,6 +22,37 @@ const FadeIn = ({ children, delay = 0, className = "", direction = "up" }: any) 
   );
 };
 
+const INCUMBENTS = [
+  {
+    amount: "$2B",
+    phrase: "for a startup still in talks",
+    who: "Miles Wang's AI drug-discovery startup — OpenAI researcher",
+    source: "TechCrunch, Jul 2026",
+    url: "https://techcrunch.com/2026/07/14/openai-researcher-miles-wang-in-talks-to-launch-ai-drug-discovery-startup-valued-at-2b/",
+  },
+  {
+    amount: "$4B",
+    phrase: "at six weeks old",
+    who: "An ex-OpenAI researcher's startup",
+    source: "The Information",
+    url: "https://www.theinformation.com/articles/ex-openai-researchers-six-week-old-startup-targets-funding-4-billion-valuation",
+  },
+  {
+    amount: "$2B",
+    phrase: "seed round — a $12B valuation",
+    who: "Thinking Machines — Mira Murati, ex-OpenAI CTO",
+    source: "TechCrunch",
+    url: "https://techcrunch.com/2025/07/15/mira-muratis-thinking-machines-lab-is-worth-12b-in-seed-round/",
+  },
+  {
+    amount: "$950M",
+    phrase: "at roughly a $15B valuation",
+    who: "Sierra — Bret Taylor, OpenAI chair",
+    source: "CNBC, May 2026",
+    url: "https://www.cnbc.com/2026/05/04/bret-taylor-sierra-fundraise-openai.html",
+  },
+];
+
 export default function Home() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -128,6 +159,51 @@ export default function Home() {
               Deposit USDC
             </Button>
           </FadeIn>
+        </div>
+      </section>
+
+      {/* Another Round of Incumbents */}
+      <section className="px-6 md:px-12 lg:px-24 py-24 border-b border-border">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            Another Round of Incumbents
+          </p>
+          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tighter uppercase text-white mb-6 leading-[1.05]">
+            The billions keep flowing to people who already have everything.
+          </h2>
+          <p className="text-lg text-muted-foreground font-light mb-14 max-w-2xl">
+            Nine-figure checks for pedigree — often before there is even a product.
+            Meanwhile, the founder with a real idea and no network never gets the call.
+          </p>
+
+          <div className="space-y-10">
+            {INCUMBENTS.map((item, i) => (
+              <a
+                key={i}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block border-l-2 border-white pl-6 group"
+              >
+                <div className="font-display text-4xl md:text-5xl font-bold text-white leading-none">
+                  {item.amount}{" "}
+                  <span className="text-base md:text-lg text-muted-foreground font-light">
+                    {item.phrase}
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground mt-3">
+                  {item.who} ·{" "}
+                  <span className="text-white group-hover:underline">
+                    {item.source} ↗
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <p className="mt-14 text-xl md:text-2xl text-white font-light">
+            This is the system. UN-VC is the other road.
+          </p>
         </div>
       </section>
 
