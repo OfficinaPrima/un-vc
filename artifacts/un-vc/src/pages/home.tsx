@@ -258,9 +258,9 @@ export default function Home() {
           {[
             { title: "The Stake", desc: "Anyone looking to raise contributes $50 in USDC into a fully transparent, publicly auditable crypto wallet. Every cent is on-chain." },
             { title: "The Threshold", desc: "Once the fund reaches its target — $5,000 for Fund 1 — it's ready to make its first investment." },
-            { title: "One Vote", desc: "Every contributor — whether they put in $50 or $10,000 — gets exactly ONE vote. Capital does not buy influence here." },
-            { title: "The Lottery", desc: "A random number is assigned to each participant. A lottery determines who even gets to pitch — preventing anyone from gaming the system." },
-            { title: "Pure Innovation", desc: "The community then votes on the best ideas, based purely on innovation and execution potential." },
+            { title: "One Vote", desc: "Every founder who submitted gets exactly ONE vote — whether they put in $50 or $10,000. Capital does not buy influence here." },
+            { title: "The Top 10", desc: "The community votes on the best ideas, judged purely on innovation and execution potential. The ten most-voted proposals advance." },
+            { title: "The Lottery", desc: "Of those ten, the winner is chosen by a real-world random lottery. Pure entropy decides — not connections, not capital." },
             { title: "Self-Sustaining", desc: "The fund takes equity in funded companies. Successful exits reinvest back into the pool — self-sustaining by design." },
           ].map((item, i) => (
             <FadeIn key={i} delay={i * 0.05} className="bg-background p-8 md:p-12 flex flex-col group">
