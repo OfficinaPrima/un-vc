@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://mnawrtomfagillerceer.supabase.co; connect-src 'self' https://un-vc-api.onrender.com https://mnawrtomfagillerceer.supabase.co; object-src 'none'; base-uri 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://mnawrtomfagillerceer.supabase.co https://www.google-analytics.com; connect-src 'self' https://un-vc-api.onrender.com https://mnawrtomfagillerceer.supabase.co https://www.google-analytics.com https://analytics.google.com; object-src 'none'; base-uri 'self'" />
     <title>UN-VC — Real Innovation. Real Chance.</title>
     <meta name="description" content="A new kind of venture fund: every founder deposits $50 on-chain, the community votes one person one vote, and entropy gives unknown founders a real shot at funding." />
     <meta name="robots" content="index, follow" />
@@ -30,6 +30,13 @@
           window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
         }
       })(window.location);
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VEC8978KKZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VEC8978KKZ');
     </script>
   </head>
   <body>
