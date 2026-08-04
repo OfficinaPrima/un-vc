@@ -34,8 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Keep in sync with login/logout events.
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      // Arriving from a password-reset email — send them to the reset form.
+      if (event === "PASSWORD_RECOVERY") {
+        window.location.replace(`${import.meta.env.BASE_URL}reset-password`);
+      }
     });
 
     return () => sub.subscription.unsubscribe();

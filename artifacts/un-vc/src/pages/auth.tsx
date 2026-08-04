@@ -13,6 +13,7 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmSent, setConfirmSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [, navigate] = useLocation();
   const { user, signOut, loading } = useAuth();
 
@@ -46,6 +47,19 @@ export default function Auth() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handleForgot() {
+    setError(null);
+    if (!email) {
+      setError("Enter your email above first, then click reset.");
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}reset-password`,
+    });
+    if (error) setError(error.message);
+    else setResetSent(true);
   }
 
   async function handleGoogle() {
@@ -158,6 +172,21 @@ export default function Auth() {
             />
           </div>
 
+          {mode === "login" && (
+            <button
+              type="button"
+              onClick={handleForgot}
+              className="text-xs uppercase tracking-widest text-muted-foreground hover:text-white underline"
+            >
+              Forgot password?
+            </button>
+          )}
+
+          {resetSent && (
+            <p className="text-sm text-green-400">
+              Reset link sent — check your email (and spam).
+            </p>
+          )}
           {error && <p className="text-sm text-red-400">{error}</p>}
 
           <Button

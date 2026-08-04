@@ -12,6 +12,7 @@ import Profile from "@/pages/profile";
 import Admin from "@/pages/admin";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import ResetPassword from "@/pages/reset-password";
 import { AuthProvider } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );
